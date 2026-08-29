@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Escape the Special Education Classroom</title>
+<style>
+body{font-family:Arial,sans-serif;margin:0;background:#0f172a;color:#f8fafc}.wrap{max-width:900px;margin:auto;padding:20px}
+.card{background:#111827;border:1px solid #334155;border-radius:16px;padding:24px;margin:18px 0}
+h1,h2{margin-top:0}.muted{color:#cbd5e1}.btn{background:#f59e0b;color:#111827;border:0;border-radius:10px;padding:12px 18px;font-weight:700;cursor:pointer}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}.room{background:#1f2937;padding:15px;border-radius:12px}
+.meta{display:flex;gap:12px;flex-wrap:wrap;color:#cbd5e1}.progress{height:10px;background:#334155;border-radius:999px;overflow:hidden;margin:12px 0}
+.bar{height:100%;background:#f59e0b;width:0}.q{font-size:1.2rem;font-weight:700;line-height:1.4;margin:18px 0}
+.answers{display:grid;gap:10px}.ans{background:#0f172a;color:#fff;border:1px solid #475569;border-radius:10px;padding:12px;text-align:left;cursor:pointer}
+.correct{background:#052e16;border-color:#22c55e}.wrong{background:#450a0a;border-color:#ef4444}
+.feedback{display:none;margin-top:14px;padding:12px;background:#0f172a;border-left:4px solid #f59e0b}.show{display:block}
+.code{padding:14px;background:#020617;border:1px dashed #64748b;border-radius:10px;text-align:center;font-size:1.2rem;letter-spacing:.12em}
+.badge{font-size:1.4rem;font-weight:800;color:#fbbf24}.note{font-size:.9rem;color:#cbd5e1}
+</style>
+</head>
+<body><div class="wrap">
+<section class="card" id="intro">
+<h1>🔐 Escape the Special Education Classroom</h1>
+<p class="muted">You watched a video on the 14 disability categories in special education. Now the classroom is locked. Solve four rooms of challenges to escape.</p>
+<div class="grid">
+<div class="room"><b>🔒 Room 1</b><p>Category Vault</p></div>
+<div class="room"><b>🔒 Room 2</b><p>Clue Match</p></div>
+<div class="room"><b>🔒 Room 3</b><p>Classroom Cases</p></div>
+<div class="room"><b>🔒 Room 4</b><p>Final Case File</p></div>
+</div>
+<p class="note">Scenario questions are practice examples. Teacher's aides should observe, document, support, and communicate with the teacher; they do not diagnose disabilities.</p>
+<button class="btn" id="start">Enter Room 1</button>
+</section>
+
+<section class="card" id="game" style="display:none">
+<div class="meta"><span>Room: <b id="roomName"></b></span><span>Question: <b id="num"></b></span><span>Score: <b id="score">0</b></span><span>Keys: <b id="keys">0</b> 🔑</span></div>
+<div class="progress"><div class="bar" id="bar"></div></div>
+<div class="q" id="question"></div><div class="answers" id="answers"></div><div class="feedback" id="feedback"></div>
+<button class="btn" id="next" style="display:none;margin-top:14px">Next</button>
+</section>
+
+<section class="card" id="roomDone" style="display:none">
+<h2 id="doneTitle"></h2><p>You recovered one piece of the escape code.</p><div class="code" id="code"></div>
+<button class="btn" id="continue" style="margin-top:14px">Unlock Next Room</button>
+</section>
+
+<section class="card" id="final" style="display:none">
+<h2>🚪 You Escaped!</h2><p>Final score: <b id="finalScore"></b>/100</p><div class="badge" id="badge"></div><p id="msg"></p>
+<div class="code">FINAL ESCAPE CODE: IDEA-14</div>
+<p class="note">Remember: disability categories guide eligibility and support planning, but they do not define the whole child.</p>
+<button class="btn" onclick="location.reload()" style="margin-top:14px">Play Again</button>
+</section>
+</div>
+<script>
+const rooms=[
+{name:"1 — Category Vault",code:"I",qs:[
+["Which category describes a developmental disability that significantly affects communication and social interaction?",["Autism","Orthopedic Impairment","Traumatic Brain Injury","Deafness"],0,"Autism is associated with significant effects on communication and social interaction."],
+["Which category involves combined hearing and visual impairments that create severe communication and educational needs?",["Visual Impairment","Deaf-Blindness","Hearing Impairment","Multiple Disabilities"],1,"Deaf-blindness refers to the combined impact of hearing and visual impairments."],
+["Which category involves an acquired injury to the brain caused by an external physical force?",["Intellectual Disability","Traumatic Brain Injury","Developmental Delay","Other Health Impairment"],1,"Traumatic Brain Injury is an acquired brain injury caused by an external physical force."],
+["Which category includes difficulty in basic psychological processes involved in understanding or using spoken or written language?",["Specific Learning Disability","Speech or Language Impairment","Emotional Disturbance","Multiple Disabilities"],0,"Specific Learning Disability can affect reading, writing, spelling, or mathematics."]
+]},
+{name:"2 — Clue Match",code:"D",qs:[
+["A learner has a significant speech sound disorder that interferes with classroom communication. Which category is the closest match?",["Speech or Language Impairment","Deafness","Autism","Visual Impairment"],0,"Speech or Language Impairment includes communication disorders that adversely affect educational performance."],
+["A student has limited strength and alertness related to a chronic health condition that affects school performance. Which category best fits?",["Other Health Impairment","Orthopedic Impairment","Multiple Disabilities","Developmental Delay"],0,"Other Health Impairment can involve limited strength, vitality, or alertness due to chronic or acute health problems."],
+["A student has a severe physical impairment that affects mobility and access to classroom materials. Which category is the closest match?",["Orthopedic Impairment","Emotional Disturbance","Hearing Impairment","Specific Learning Disability"],0,"Orthopedic Impairment involves a severe orthopedic condition that may affect educational performance."],
+["A young child has delays in physical, cognitive, communication, social-emotional, or adaptive development. Which category fits best?",["Developmental Delay","Intellectual Disability","Multiple Disabilities","Autism"],0,"Developmental Delay may be used for younger children with delays in one or more developmental areas."]
+]},
+{name:"3 — Classroom Cases",code:"E",qs:[
+["During reading, Maya can explain ideas aloud but consistently struggles to decode words and spell, even with appropriate instruction. What should a teacher's aide do FIRST?",["Tell the parent Maya has dyslexia","Document the difficulty and share observations with the teacher","Move Maya permanently to a lower group","Assume she is not trying"],1,"A teacher's aide should observe, document, support instruction, and communicate with the teacher—not diagnose."],
+["Jordan becomes overwhelmed by sudden routine changes and has marked difficulty with social communication. Which support is most appropriate?",["Give unexpected directions","Use clear routines, visual supports, and advance warning","Exclude Jordan from groups","Ignore signs of distress"],1,"Predictability, visual supports, and preparation for changes can support participation."],
+["A student with significant hearing loss misses oral directions during group work. What is the BEST response?",["Repeat the same directions louder","Provide visual or written directions and ensure communication access","Excuse the student from group work","Have another student do the task"],1,"Accessible communication may include visual directions, positioning, assistive technology, or other individualized supports."],
+["A student with a visual impairment begins a worksheet activity. Which action best supports access?",["Wait to see if the student struggles","Provide the material in an accessible format and describe relevant visual information","Have a peer do it","Skip the activity"],1,"Accessible formats and description support participation without lowering expectations."]
+]},
+{name:"4 — Final Case File",code:"A",qs:[
+["A student has both an intellectual disability and a significant orthopedic impairment. The combined needs are so severe that a program for only one impairment would not meet the student's needs. Which category is most likely?",["Multiple Disabilities","Other Health Impairment","Developmental Delay","Specific Learning Disability"],0,"Multiple Disabilities applies when combined impairments create severe educational needs that cannot be addressed by a program for only one impairment."],
+["A learner has a hearing impairment but is not described as having a level of hearing loss that falls under deafness. Which category is the closer match?",["Hearing Impairment","Deaf-Blindness","Speech or Language Impairment","Autism"],0,"Hearing Impairment is the closer match."],
+["A student has a condition affecting emotional functioning over a long period and to a marked degree, with a serious adverse effect on school performance. Which category is the closest match?",["Emotional Disturbance","Specific Learning Disability","Intellectual Disability","Other Health Impairment"],0,"Emotional Disturbance addresses specified emotional or behavioral characteristics that adversely affect educational performance."],
+["FINAL LOCK: What is the safest conclusion when a student seems to match one of these classroom scenarios?",["The teacher's aide can determine the category","The student automatically receives special education","Observations are clues for support and referral, but formal eligibility requires evaluation and team decision-making","The category alone determines placement"],2,"Correct. Classroom observations can guide support and referral, but eligibility and placement require formal evaluation and team decision-making."]
+]}];
+
+let r=0,q=0,score=0,keys=0,answered=false; const total=16;
+const el=id=>document.getElementById(id);
+el("start").onclick=()=>{el("intro").style.display="none";el("game").style.display="block";render()};
+el("next").onclick=()=>{q++; if(q<rooms[r].qs.length){render()}else{finishRoom()}};
+
+function render(){
+ answered=false; const item=rooms[r].qs[q];
+ el("roomName").textContent=rooms[r].name;el("num").textContent=(q+1)+" of "+rooms[r].qs.length;el("score").textContent=Math.round(score);el("keys").textContent=keys;
+ const done=r*4+q; el("bar").style.width=(done/total*100)+"%";el("question").textContent=item[0];el("answers").innerHTML="";
+ item[1].forEach((t,i)=>{const b=document.createElement("button");b.className="ans";b.textContent=t;b.onclick=()=>choose(i,b);el("answers").appendChild(b)});
+ el("feedback").className="feedback";el("feedback").textContent="";el("next").style.display="none";
+}
+function choose(i,b){
+ if(answered)return;answered=true;const item=rooms[r].qs[q];[...document.querySelectorAll(".ans")].forEach((x,j)=>{if(j===item[2])x.classList.add("correct");if(j===i&&i!==item[2])x.classList.add("wrong");x.disabled=true});
+ if(i===item[2]){score+=6.25;keys++;el("feedback").textContent="🔑 Correct! "+item[3]}else{el("feedback").textContent="🧩 Not quite. "+item[3]}
+ el("feedback").classList.add("show");el("score").textContent=Math.round(score);el("keys").textContent=keys;el("next").style.display="inline-block";
+}
+function finishRoom(){
+ el("game").style.display="none";el("roomDone").style.display="block";el("doneTitle").textContent="🔓 "+rooms[r].name+" Unlocked";el("code").textContent="CODE PIECE: "+rooms[r].code;q=0;r++;
+ el("continue").textContent=r>=rooms.length?"Open the Exit Door":"Unlock Next Room";el("continue").onclick=r>=rooms.length?finish:()=>{el("roomDone").style.display="none";el("game").style.display="block";render()};
+}
+function finish(){
+ el("roomDone").style.display="none";el("final").style.display="block";const s=Math.round(score);el("finalScore").textContent=s;
+ let b,m;if(s>=90){b="🏆 Master Escape Artist";m="Excellent application of disability categories and classroom support principles."}else if(s>=75){b="🔑 Skilled Problem Solver";m="Strong work. Review the few categories you missed."}else if(s>=60){b="🧩 Developing Detective";m="You escaped, but some clues were tricky. Review the video and try again."}else{b="📘 Rookie Investigator";m="Review the video carefully, then replay the rooms and improve your score."}
+ el("badge").textContent=b;el("msg").textContent=m;
+}
+</script></body></html>
